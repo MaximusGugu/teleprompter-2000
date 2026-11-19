@@ -318,15 +318,30 @@ Quando estiver pronto, pressione o botão de play — ou a barra de espaço — 
     updateSetting('speed', next);
   }
 
+  function getMaxScrollTop() {
+    return Math.max(0, elements.viewport.scrollHeight - elements.viewport.clientHeight);
+  }
+
+  function toggleVerticalMirror() {
+    const previousMax = getMaxScrollTop();
+    const previousProgress = previousMax ? elements.viewport.scrollTop / previousMax : 0;
+    updateSetting('mirrorV', !state.settings.mirrorV);
+    elements.viewport.scrollTop = getMaxScrollTop() * (1 - previousProgress);
+    scheduleActiveLineUpdate();
+  }
+
   function frame(timestamp) {
     if (!isPlaying) return;
     if (!lastTimestamp) lastTimestamp = timestamp;
     const elapsed = Math.min(50, timestamp - lastTimestamp);
     lastTimestamp = timestamp;
     const pixelsPerSecond = 9 + state.settings.speed * 10;
-    elements.viewport.scrollTop += (pixelsPerSecond * elapsed) / 1000;
+    const direction = state.settings.mirrorV ? -1 : 1;
+    elements.viewport.scrollTop += direction * (pixelsPerSecond * elapsed) / 1000;
     scheduleActiveLineUpdate();
-    const reachedEnd = elements.viewport.scrollTop + elements.viewport.clientHeight >= elements.viewport.scrollHeight - 2;
+    const reachedEnd = state.settings.mirrorV
+      ? elements.viewport.scrollTop <= 2
+      : elements.viewport.scrollTop + elements.viewport.clientHeight >= elements.viewport.scrollHeight - 2;
     if (reachedEnd) {
       hasEnded = true;
       pause();
@@ -374,7 +389,7 @@ Quando estiver pronto, pressione o botão de play — ou a barra de espaço — 
   function resetScroll(notify = true) {
     hasEnded = false;
     pause();
-    elements.viewport.scrollTo({ top: 0, behavior: 'smooth' });
+    elements.viewport.scrollTo({ top: state.settings.mirrorV ? getMaxScrollTop() : 0, behavior: 'smooth' });
     if (notify) showToast('Roteiro reiniciado');
   }
 
@@ -441,7 +456,7 @@ Quando estiver pronto, pressione o botão de play — ou a barra de espaço — 
   elements.textColor.addEventListener('input', event => updateSetting('textColor', event.target.value));
   elements.backgroundColor.addEventListener('input', event => updateSetting('backgroundColor', event.target.value));
   elements.mirrorH.addEventListener('click', () => updateSetting('mirrorH', !state.settings.mirrorH));
-  elements.mirrorV.addEventListener('click', () => updateSetting('mirrorV', !state.settings.mirrorV));
+  elements.mirrorV.addEventListener('click', toggleVerticalMirror);
   elements.speedRange.addEventListener('input', event => updateSetting('speed', Number(event.target.value)));
   elements.highlightToggle.addEventListener('change', event => updateSetting('highlightLine', event.target.checked));
   elements.playButton.addEventListener('click', togglePlay);
@@ -482,4 +497,8 @@ Quando estiver pronto, pressione o botão de play — ou a barra de espaço — 
   updatePrompt();
   applySettings();
   renderLibrary();
+  requestAnimationFrame(() => {
+    elements.viewport.scrollTop = state.settings.mirrorV ? getMaxScrollTop() : 0;
+    scheduleActiveLineUpdate();
+  });
 })();

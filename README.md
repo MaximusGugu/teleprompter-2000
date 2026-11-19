@@ -7,6 +7,7 @@ Teleprompter responsivo feito apenas com HTML, CSS e JavaScript. Não há depend
 - reprodução automática com slider de 30 níveis de velocidade;
 - tamanho e cor do texto, espaçamento entre linhas e cor do fundo;
 - espelhamento horizontal e vertical;
+- direção da rolagem invertida automaticamente no espelhamento vertical;
 - direções de leitura discretas com a sintaxe `*pausa*` ou `*respira*`;
 - editor e biblioteca de roteiros no navegador (`localStorage`);
 - PWA instalável, funcionamento offline, modo tela cheia e layout responsivo;
