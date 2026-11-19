@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <meta name="theme-color" content="#07080a" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Prompto" />
+    <meta
+      name="description"
+      content="Teleprompter elegante e rápido, com controles de leitura, espelhamento e biblioteca local de roteiros."
+    />
+    <title>Prompto — Teleprompter</title>
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="icon" href="icons/icon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="icons/icon.svg" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <a class="brand" href="#" aria-label="Prompto — início">
+          <span class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 28 28"><path d="M7 5.5h14a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-13a2 2 0 0 1 2-2Z"/><path d="M10 10h8M10 14h8M10 18h5"/></svg>
+          </span>
+          <span>PROMPTO</span>
+        </a>
+
+        <div class="topbar-actions">
+          <span class="save-state" id="saveState"><i></i> Salvo neste dispositivo</span>
+          <button class="button button-ghost editor-toggle" id="editorToggle" type="button" aria-expanded="true">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
+            Roteiros
+          </button>
+          <button class="icon-button" id="fullscreenButton" type="button" aria-label="Abrir em tela cheia" title="Tela cheia (F)">
+            <svg class="fullscreen-enter-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5"/></svg>
+            <svg class="fullscreen-exit-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 8h5V3M21 8h-5V3M3 16h5v5M21 16h-5v5"/></svg>
+          </button>
+        </div>
+      </header>
+
+      <main class="workspace">
+        <aside class="editor-panel" id="editorPanel" aria-label="Editor de roteiros">
+          <div class="editor-heading">
+            <div>
+              <p class="eyebrow">SEU ROTEIRO</p>
+              <h1>Prepare sua fala</h1>
+            </div>
+            <button class="icon-button panel-close" id="panelClose" type="button" aria-label="Fechar editor">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
+            </button>
+          </div>
+
+          <label class="field-label" for="scriptTitle">Título</label>
+          <input class="text-input" id="scriptTitle" maxlength="80" placeholder="Nome do roteiro" value="Meu primeiro roteiro" />
+
+          <div class="label-row">
+            <label class="field-label" for="scriptText">Texto</label>
+            <span><i>*pausa*</i> cria uma direção · <b id="wordCount">0 palavras</b></span>
+          </div>
+          <textarea class="script-editor" id="scriptText" spellcheck="true" placeholder="Cole ou escreva aqui o texto que você quer apresentar..."></textarea>
+
+          <div class="editor-actions">
+            <button class="button button-primary" id="saveButton" type="button">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h12l2 2v14H5V4Z"/><path d="M8 4v6h8V4M8 20v-6h8v6"/></svg>
+              Salvar roteiro
+            </button>
+            <button class="button button-ghost" id="newButton" type="button">Novo</button>
+          </div>
+
+          <div class="library-header">
+            <div>
+              <p class="eyebrow">BIBLIOTECA LOCAL</p>
+              <span>Seus textos ficam somente neste navegador.</span>
+            </div>
+            <span class="script-total" id="scriptTotal">0</span>
+          </div>
+          <div class="script-list" id="scriptList"></div>
+        </aside>
+
+        <section class="stage-wrap" aria-label="Teleprompter">
+          <div class="stage" id="stage">
+            <div class="stage-empty" id="stageEmpty" hidden>
+              <svg viewBox="0 0 48 48" aria-hidden="true"><path d="M10 7h28a4 4 0 0 1 4 4v26a4 4 0 0 1-4 4H10a4 4 0 0 1-4-4V11a4 4 0 0 1 4-4Z"/><path d="M15 17h18M15 24h18M15 31h11"/></svg>
+              <strong>Seu texto aparece aqui</strong>
+              <span>Digite ou cole um roteiro no painel lateral.</span>
+            </div>
+
+            <div class="cue-line" aria-hidden="true"><span></span><span></span></div>
+            <div class="prompt-viewport" id="promptViewport">
+              <article class="prompt-text" id="promptText"></article>
+            </div>
+
+            <button class="stage-editor-button" id="stageEditorButton" type="button">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
+              Abrir roteiros
+            </button>
+
+            <button class="fullscreen-play-button" id="fullscreenPlayButton" type="button" aria-label="Iniciar teleprompter">
+              <svg class="play-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 9 6-9 6V6Z"/></svg>
+              <svg class="pause-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6v12M16 6v12"/></svg>
+              <svg class="restart-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4v6h6M5.5 14a7 7 0 1 0 1.7-7.2L4 10"/></svg>
+            </button>
+
+            <div class="control-dock" id="controlDock">
+              <div class="control-group typography-controls">
+                <div class="slider-control">
+                  <label for="fontSize">Tamanho <output id="fontSizeValue">64</output></label>
+                  <input id="fontSize" type="range" min="28" max="120" value="64" />
+                </div>
+                <div class="slider-control">
+                  <label for="lineHeight">Entrelinha <output id="lineHeightValue">1.35</output></label>
+                  <input id="lineHeight" type="range" min="1" max="2" step="0.05" value="1.35" />
+                </div>
+                <div class="color-control">
+                  <label for="textColor">Texto</label>
+                  <input id="textColor" type="color" value="#f4f1e9" />
+                </div>
+                <div class="color-control">
+                  <label for="backgroundColor">Fundo</label>
+                  <input id="backgroundColor" type="color" value="#08090b" />
+                </div>
+              </div>
+
+              <div class="transport" aria-label="Controles de reprodução">
+                <button class="play-button" id="playButton" type="button" aria-label="Iniciar teleprompter" title="Reproduzir/Pausar (Espaço)">
+                  <svg class="play-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 9 6-9 6V6Z"/></svg>
+                  <svg class="pause-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6v12M16 6v12"/></svg>
+                  <svg class="restart-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4v6h6M5.5 14a7 7 0 1 0 1.7-7.2L4 10"/></svg>
+                </button>
+                <div class="speed-slider-control">
+                  <label for="speedRange">Velocidade <output id="speedValue">3</output></label>
+                  <input id="speedRange" type="range" min="1" max="30" value="3" />
+                </div>
+              </div>
+
+              <div class="control-group utility-controls">
+                <label class="highlight-switch" for="highlightToggle">
+                  <span class="switch-copy">Linha ativa</span>
+                  <input id="highlightToggle" type="checkbox" checked />
+                  <span class="switch-track" aria-hidden="true"><i></i></span>
+                </label>
+                <div class="mirror-control" role="group" aria-label="Espelhamento do texto">
+                  <span>Espelhar</span>
+                  <button class="mini-button" id="mirrorHorizontal" type="button" aria-pressed="false" title="Espelhar horizontalmente">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18M9 6 4 12l5 6M15 6l5 6-5 6"/></svg>
+                    H
+                  </button>
+                  <button class="mini-button" id="mirrorVertical" type="button" aria-pressed="false" title="Espelhar verticalmente">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h18M6 9l6-5 6 5M6 15l6 5 6-5"/></svg>
+                    V
+                  </button>
+                </div>
+                <button class="mini-button reset-button" id="resetButton" type="button" title="Voltar ao início (Home)">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4v6h6M5.5 14a7 7 0 1 0 1.7-7.2L4 10"/></svg>
+                  Reiniciar
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
